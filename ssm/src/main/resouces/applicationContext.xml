@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--引入jdbc配置文件-->
+    <context:property-placeholder location="classpath:jdbcConfig.properties"/>
+    <!--配置spring注解扫描-->
+    <context:component-scan base-package="com.company">
+        <!--Controller的部分交给SpringMVC去扫描-->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <!--整合MyBaties↓-->
+    <!--1.准备连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+        <property name="url" value="${jdbc.url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!--2.配置MyBatis的SQLSession工厂-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <!--配置实体类别名，多个包在value值中使用“;”进行分隔-->
+        <property name="typeAliasesPackage" value="com.company.entity"></property>
+    </bean>
+    <!--3.配置myBatis扫描的包-->
+    <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.company.dao"></property>
+    </bean>
+    <!--整合MyBaties↑-->
+
+    <!--事务控制↓-->
+        <!--事务管理器-->
+        <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource"></property>
+        </bean>
+        <!--切入点配置-->
+        <tx:advice id="txAdvice" transaction-manager="transactionManager">
+            <tx:attributes>
+                <tx:method name="*" propagation="REQUIRED" read-only="false"/>
+                <tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+            </tx:attributes>
+        </tx:advice>
+        <!--配置事务管理器和切入点增强方法-->
+        <aop:config>
+            <aop:pointcut id="pt1" expression="execution(* com.company.service.impl.*.*(..))"></aop:pointcut>
+            <aop:advisor advice-ref="txAdvice" pointcut-ref="pt1"></aop:advisor>
+        </aop:config>
+    <!--事务控制↑-->
+</beans>
