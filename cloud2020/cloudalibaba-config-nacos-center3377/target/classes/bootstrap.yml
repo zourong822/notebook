@@ -1,0 +1,17 @@
+server:
+  port: 3377
+
+spring:
+  application:
+    name: nacos-config-center
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 #nacos注册中心地址
+      config:
+        server-addr: 127.0.0.1:8848 #nacos作为配置中心地址
+        file-extension: yaml #指定配置文件后缀
+        group: DEFAULT_GROUP #指定分组
+        namespace: e5f964ef-50c7-41a9-a395-8b2479a43756 #指定命名空间
+
+# 配置文件名：${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}

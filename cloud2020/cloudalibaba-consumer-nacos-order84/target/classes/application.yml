@@ -1,0 +1,29 @@
+server:
+  port: 84
+spring:
+  application:
+    name: nacos-consumer-order
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置nacos注册中心地址
+#        server-addr: 192.168.100.26:1111 #本地Nginx的地址，连接Nginx后的nacos集群
+    sentinel:
+          transport:
+            port: 8719 #默认8719，如果被占用就会累加1测试,直到找到可用的端口
+            dashboard: localhost:8080 #sentinel的dashboard地址
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+service-url:
+  nacos-user-service: http://nacos-payment-provider
+
+#激活sentinel对feign的支持
+feign:
+  sentinel:
+    enabled: true
+

@@ -1,0 +1,46 @@
+server:
+  port: 8401
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置nacos注册中心地址
+#        server-addr: 192.168.100.26:1111 #本地Nginx的地址，连接Nginx后的nacos集群
+    sentinel:
+          transport:
+            port: 8719 #默认8719，如果被占用就会累加1测试,直到找到可用的端口
+            dashboard: localhost:8080 #sentinel的dashboard地址
+          datasource: #配置sentinel限流规则nacos为数据源。
+                      ds1:
+                        nacos:
+                          server-addr: localhost:8848
+                          dataId: ${spring.application.name}
+                          groupId: DEFAULT_GROUP
+                          data-type: json
+                          rule-type: flow
+#           datasource配置，在nacos控制台添加配置，dataId为服务名，格式json，可配置多个持久化的限流规则。
+#          [
+#              {
+#                  "resource":"/byResource/byUrl",
+#                  "limitApp":"default",
+#                  "grade":1,
+#                  "count":1,
+#                  "strategy":0,
+#                  "controlBehavior":0,
+#                  "clusterMode":false
+#              }
+#          ]
+#resource：资源名称
+#limitApp：来源应用
+#grade：阈值类型，0表示线程数，1表示QPS
+#count：单机阈值
+#strategy：流控模式，0直接，1关联，2链路
+#controlBehavior：流控效果，0快速失败，1Warm Up，2排队等待
+#clusterMode：是否集群
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
